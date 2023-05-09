@@ -1,0 +1,38 @@
+---
+title: "SOK-2012 Mappeoppgave 2"
+output: pdf_document
+date: "2023-05-06"
+---
+
+```{r setup, include=FALSE}
+n <- 100
+reps <- c(10, 100, 1000, 10000, 100000)
+set.seed(420)
+
+data <- array(sample(c(0,1), max(reps)*n, replace=TRUE), c(max(reps),n))
+intervals <- seq(0, 99, by=1)
+mean_probs <- matrix(nrow=length(intervals), ncol=length(reps))
+
+for (k in 1:length(reps)) {
+  rep <- reps[k]
+  pb <- txtProgressBar(min = 0, max = length(intervals), style = 3,
+                       label = sprintf("rep = %d", rep))
+  prob <- rep(NA, rep)
+  for (j in 1:length(intervals)) {
+    for (i in 1:rep){
+      heads1 <- data[i,1:(n-1)][1:intervals[j]]==1
+      heads2 <- data[i,2:n][1:intervals[j]]==1
+      n_heads1 <- sum(heads1)
+      if (n_heads1 > 0) {
+        prob[i] <- sum(heads1 & heads2, na.rm=TRUE)/n_heads1
+      }
+      }
+    mean_probs[j,k] <- mean(prob, na.rm=TRUE)
+    setTxtProgressBar(pb, j)
+    }
+  close(pb)
+}
+
+prob
+mean(prob)
+```
